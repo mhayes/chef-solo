@@ -1,0 +1,8 @@
+production:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  pool: 5
+  username: <%= node[:rails_app][:database_username] %>
+  password: <%= node[:rails_app][:database_password] %>
+  database: <%= node[:rails_app][:database_name] %>

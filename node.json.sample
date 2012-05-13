@@ -1,0 +1,14 @@
+{
+  "user": {
+    "name":"deployer",
+    "authorized_keys_url":"https://raw.github.com/gist/b398348e220b4e3ca000/public_keys.pub"
+  },
+  "mysql":{
+    "server_root_password":"secret"
+  },
+  "rails_app":{
+    "name":"awesomeapp",
+    "database_password":"secret"
+  },
+  "run_list":["recipe[main]"]
+}
