@@ -1,12 +1,18 @@
 package "git-core"
 include_recipe "nginx"
-include_recipe "mysql::server"
-%w(mysql unicorn).each do |g|
-  gem_package g do
-    action :install
-  end
+
+# Setup MongoDB
+execute "sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10" do
+  user "root"
+  group "root"
 end
-include_recipe "mysql::client"
+cmd = 'echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" >> /etc/apt/sources.list'
+execute cmd
+execute "sudo apt-get update"
+package "mongodb-10gen"
+
+# execute "mongo admin --eval 'db.addUser(\"root\", \"#{node[:mongodb][:server_root_password]}\")'"
+execute "mongo #{node[:rails_app][:database_name]} --eval 'db.addUser(\"#{node[:rails_app][:database_username]}\", \"#{node[:rails_app][:database_password]}\")'"
 
 # Setup a Deployment User
 user node[:user][:name] do
@@ -26,21 +32,6 @@ remote_file "/home/#{node[:user][:name]}/.ssh/authorized_keys" do
   mode "0644"
   owner node[:user][:name]
   group node[:user][:name]
-end
-
-# Setup MySQL Database for Application
-mysql_connection_info = {:host => "localhost", :username => "root", :password => node[:mysql][:server_root_password]}
-
-mysql_database node[:rails_app][:database_name] do
-  connection mysql_connection_info
-  action :create
-end
-
-mysql_database_user node[:rails_app][:database_user] do
-  connection mysql_connection_info
-  password node[:rails_app][:database_password]
-  database_name node[:rails_app][:database_name]
-  action :grant
 end
 
 # Setup Capistrano Directory Structure
@@ -63,14 +54,14 @@ end
 
 # Setup Rails / Nginx / Unicorn Configuration
 template "#{node[:rails_app][:www_app_path]}/shared/config/database.yml" do
-  source "rails_app_database_yml.erb"
+  source "rails_app.mongoid.yml.erb"
   owner node[:user][:name]
   group node[:user][:name]
   mode "0640"
 end
 
 template "#{node[:rails_app][:www_app_path]}/shared/config/unicorn.rb" do
-  source "rails_app_unicorn.erb"
+  source "rails_app.unicorn.rb.erb"
   owner node[:user][:name]
   group node[:user][:name]
   mode "0640"
@@ -78,7 +69,7 @@ end
 
 nginx_config_path = "#{node[:rails_app][:www_app_path]}/shared/config/nginx.conf"
 template nginx_config_path do
-  source "rails_app_nginx_site.erb"
+  source "rails_app.nginx_site.conf.erb"
   owner node[:user][:name]
   group node[:user][:name]
   mode "0640"
@@ -90,7 +81,7 @@ nginx_site node[:rails_app][:name]
 
 # Setup init script so unicorn will boot automatically upon reboot
 template "/etc/init.d/unicorn_#{node[:rails_app][:name]}" do
-  source "unicorn_init.erb"
+  source "rails_app.unicorn_init.sh.erb"
   owner "root"
   group "root"
   mode "0755"
@@ -102,7 +93,7 @@ end
 # Save some capistrano deployment files that can be copied
 directory "/home/#{node[:user][:name]}/deploy"
 template "/home/#{node[:user][:name]}/deploy/#{node[:rails_app][:name]}.rb" do
-  source "capistrano_deploy.erb"
+  source "rails_app.deploy.rb.erb"
   owner node[:user][:name]
   group node[:user][:name]
 end
