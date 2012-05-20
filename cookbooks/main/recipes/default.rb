@@ -53,7 +53,7 @@ end
 end
 
 # Setup Rails / Nginx / Unicorn Configuration
-template "#{node[:rails_app][:www_app_path]}/shared/config/database.yml" do
+template "#{node[:rails_app][:www_app_path]}/shared/config/mongoid.yml" do
   source "rails_app.mongoid.yml.erb"
   owner node[:user][:name]
   group node[:user][:name]
@@ -97,3 +97,6 @@ template "/home/#{node[:user][:name]}/deploy/#{node[:rails_app][:name]}.rb" do
   owner node[:user][:name]
   group node[:user][:name]
 end
+
+# Make sure unicorn gem is present
+gem_package "unicorn"
