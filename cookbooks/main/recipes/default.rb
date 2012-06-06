@@ -1,18 +1,14 @@
 package "git-core"
 include_recipe "nginx"
+include_recipe "mongo"
 
-# Setup MongoDB
-execute "sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10" do
-  user "root"
-  group "root"
+mongo_user node[:rails_app][:database_name] do
+  user node[:rails_app][:database_username]
+  password node[:rails_app][:database_password]
 end
-cmd = 'echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" >> /etc/apt/sources.list'
-execute cmd
-execute "sudo apt-get update"
-package "mongodb-10gen"
 
 # execute "mongo admin --eval 'db.addUser(\"root\", \"#{node[:mongodb][:server_root_password]}\")'"
-execute "mongo #{node[:rails_app][:database_name]} --eval 'db.addUser(\"#{node[:rails_app][:database_username]}\", \"#{node[:rails_app][:database_password]}\")'"
+# execute "mongo #{node[:rails_app][:database_name]} --eval 'db.addUser(\"#{node[:rails_app][:database_username]}\", \"#{node[:rails_app][:database_password]}\")'"
 
 # Setup a Deployment User
 user node[:user][:name] do
@@ -80,14 +76,17 @@ end
 nginx_site node[:rails_app][:name]
 
 # Setup init script so unicorn will boot automatically upon reboot
-template "/etc/init.d/unicorn_#{node[:rails_app][:name]}" do
-  source "rails_app.unicorn_init.sh.erb"
+template "/etc/init/unicorn_#{node[:rails_app][:name]}.conf" do
+  source "rails_app.unicorn_init.conf.erb"
   owner "root"
   group "root"
   mode "0755"
+  notifies :run, resources(:execute => "start-unicorn"), :immediately
 end
-execute "update-rc.d unicorn_#{node[:rails_app][:name]} defaults" do
+execute "start-unicorn" do
+  command "start unicorn_#{node[:rails_app][:name]}" 
   user "root"
+  action :nothing
 end
 
 # Save some capistrano deployment files that can be copied

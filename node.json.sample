@@ -1,9 +1,8 @@
 {
   "user": {
-    "name":"deployer",
-    "authorized_keys_url":"https://raw.github.com/gist/b398348e220b4e3ca000/public_keys.pub"
+    "name":"deployer"
   },
-  "mysql":{
+  "mongodb":{
     "server_root_password":"secret"
   },
   "rails_app":{

@@ -1,0 +1,6 @@
+start on runlevel [2345]
+stop on runlevel [06]
+
+script
+  su -c "cd <%= node[:rails_app][:www_app_path] %>/current && bundle exec unicorn -c config/unicorn.rb -E production -D" <%= node[:user][:name] %>
+end script
