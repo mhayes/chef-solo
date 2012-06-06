@@ -7,9 +7,6 @@ mongo_user node[:rails_app][:database_name] do
   password node[:rails_app][:database_password]
 end
 
-# execute "mongo admin --eval 'db.addUser(\"root\", \"#{node[:mongodb][:server_root_password]}\")'"
-# execute "mongo #{node[:rails_app][:database_name]} --eval 'db.addUser(\"#{node[:rails_app][:database_username]}\", \"#{node[:rails_app][:database_password]}\")'"
-
 # Setup a Deployment User
 user node[:user][:name] do
   home "/home/#{node[:user][:name]}"
@@ -75,6 +72,12 @@ link "/etc/nginx/sites-available/#{node[:rails_app][:name]}" do
 end
 nginx_site node[:rails_app][:name]
 
+execute "start-unicorn" do
+  command "start unicorn_#{node[:rails_app][:name]}" 
+  user "root"
+  action :nothing
+end
+
 # Setup init script so unicorn will boot automatically upon reboot
 template "/etc/init/unicorn_#{node[:rails_app][:name]}.conf" do
   source "rails_app.unicorn_init.conf.erb"
@@ -82,11 +85,6 @@ template "/etc/init/unicorn_#{node[:rails_app][:name]}.conf" do
   group "root"
   mode "0755"
   notifies :run, resources(:execute => "start-unicorn"), :immediately
-end
-execute "start-unicorn" do
-  command "start unicorn_#{node[:rails_app][:name]}" 
-  user "root"
-  action :nothing
 end
 
 # Save some capistrano deployment files that can be copied

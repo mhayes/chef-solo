@@ -2,9 +2,6 @@
   "user": {
     "name":"deployer"
   },
-  "mongodb":{
-    "server_root_password":"secret"
-  },
   "rails_app":{
     "name":"awesomeapp",
     "database_password":"secret"
