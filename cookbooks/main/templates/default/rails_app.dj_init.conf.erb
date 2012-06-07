@@ -1,0 +1,6 @@
+start on runlevel [2345]
+stop on runlevel [06]
+
+script
+  su -c "RAILS_ENV=production <%= node[:rails_app][:www_app_path] %>/current/script/delayed_job start" <%= node[:user][:name] %>
+end script
