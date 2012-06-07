@@ -14,6 +14,8 @@ user node[:user][:name] do
   supports manage_home:true
 end
 
+execute "sudo usermod -a -G admin #{node[:user][:name]}"
+
 directory "/home/#{node[:user][:name]}/.ssh" do
   mode "0700"
   owner node[:user][:name]
