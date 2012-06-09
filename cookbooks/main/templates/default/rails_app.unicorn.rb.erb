@@ -10,8 +10,7 @@ rails_env = ENV['RAILS_ENV'] || 'production'
 
 pid "/tmp/unicorn.<%= node[:rails_app][:name] %>.pid"
 
-# 4 workers and 1 master
-worker_processes (rails_env == 'production' ? 4 : 4)
+worker_processes 2
 
 # Load rails+github.git into the master before forking workers
 # for super-fast worker spawn times
