@@ -2,7 +2,7 @@
 # /tmp/unicorn.app_name.sock
 # /tmp/unicorn.app_name.pid
 
-RAILS_ROOT = <%= node[:rails_app][:www_app_path] %>
+RAILS_ROOT = "<%= node[:rails_app][:www_app_path] %>/current"
 
 # Important for SIGUSR2
 working_directory RAILS_ROOT
