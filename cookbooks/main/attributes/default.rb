@@ -6,3 +6,4 @@ default["rails_app"]["www_app_path"] = "/var/www/#{node[:rails_app][:name]}"
 default["rails_app"]["database_username"] = node[:rails_app][:name]
 default["rails_app"]["database_name"] = "#{node[:rails_app][:name]}_production"
 default["rails_app"]["unicorn_path"] = "/usr/bin/unicorn"
+default["rails_app"]["delayed_job"] = false

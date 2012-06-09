@@ -1,6 +1,14 @@
-start on runlevel [2345]
-stop on runlevel [06]
+start on startup
+stop on shutdown
 
-script
-  su -c "cd <%= node[:rails_app][:www_app_path] %>/current && bundle exec unicorn -c config/unicorn.rb -E production -D" <%= node[:user][:name] %>
+chdir <%= node[:rails_app][:www_app_path] %>/current
+env RAILS_ENV=production
+normal exit 0 QUIT USR2
+
+pre-start script
+  su -c "bundle exec unicorn -c config/unicorn.rb -D" <%= node[:user][:name] %>
+end script
+
+post-stop script
+  exec kill `cat <%= node[:rails_app][:unicorn_pid_path] %>`
 end script

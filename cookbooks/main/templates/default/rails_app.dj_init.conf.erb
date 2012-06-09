@@ -1,0 +1,9 @@
+start on startup
+stop on shutdown
+
+chdir <%= node[:rails_app][:www_app_path] %>/current
+env RAILS_ENV=production
+
+script  
+  su -c "bundle exec rake jobs:work" <%= node[:user][:name] %>
+end script

@@ -74,19 +74,22 @@ link "/etc/nginx/sites-available/#{node[:rails_app][:name]}" do
 end
 nginx_site node[:rails_app][:name]
 
-execute "start-unicorn" do
-  command "start unicorn_#{node[:rails_app][:name]}" 
-  user "root"
-  action :nothing
-end
-
 # Setup init script so unicorn will boot automatically upon reboot
 template "/etc/init/unicorn_#{node[:rails_app][:name]}.conf" do
   source "rails_app.unicorn_init.conf.erb"
   owner "root"
   group "root"
   mode "0755"
-  notifies :run, resources(:execute => "start-unicorn"), :immediately
+end
+
+if node[:rails_app][:delayed_job]
+  # Setup init script so delayed_job will boot automatically upon reboot
+  template "/etc/init/dj_#{node[:rails_app][:name]}.conf" do
+    source "rails_app.dj_init.conf.erb"
+    owner "root"
+    group "root"
+    mode "0755"
+  end
 end
 
 # Save some capistrano deployment files that can be copied
