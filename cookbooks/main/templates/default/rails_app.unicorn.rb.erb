@@ -24,6 +24,10 @@ timeout 30
 # Listen on a Unix data socket
 listen "<%= node[:rails_app][:unicorn_sock_path] %>", :backlog => 2048
 
+before_exec do |server|
+  ENV["BUNDLE_GEMFILE"] = "#{RAILS_ROOT}/Gemfile"
+end
+
 before_fork do |server, worker|
   ##
   # When sent a USR2, Unicorn will suffix its pidfile with .oldbin and
